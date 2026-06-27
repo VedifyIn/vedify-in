@@ -1,5 +1,7 @@
 # Content sources - named configurations
 # Override with: CONTENT_SOURCE=<name> or --content=<name>
+# Each source supports an optional commit field to pin a specific hash.
+# commit: abc123def  # optional — pins to a specific commit, defaults to latest
 sources:
   dummy:
     repo: git@github.com:VedifyIn/vedify-in.git

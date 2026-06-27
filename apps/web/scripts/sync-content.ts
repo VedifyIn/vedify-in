@@ -11,6 +11,7 @@ const CONFIG_PATH = resolve(PROJECT_ROOT, 'content-config.yaml');
 interface SourceConfig {
   repo: string;
   branch: string;
+  commit?: string;
 }
 
 interface ContentConfig {
@@ -89,18 +90,26 @@ if (!source) {
 
 const targetDir = resolve(PROJECT_ROOT, config.target || 'src/content');
 
-console.log(`[content] Syncing from "${sourceName}" → ${source.repo}#${source.branch}`);
+const ref = source.commit ? `${source.commit} (branch: ${source.branch})` : source.branch;
+console.log(`[content] Syncing from "${sourceName}" → ${source.repo}#${ref}`);
 
 if (existsSync(targetDir)) {
   execSync(`rm -rf "${targetDir}"`, { stdio: 'pipe' });
 }
 
 try {
-  execSync(`git clone --depth 1 --branch "${source.branch}" "${source.repo}" "${targetDir}"`, {
-    stdio: 'inherit',
-  });
+  if (source.commit) {
+    execSync(
+      `git init "${targetDir}" && git -C "${targetDir}" remote add origin "${source.repo}" && git -C "${targetDir}" fetch --depth 1 origin "${source.commit}" && git -C "${targetDir}" checkout FETCH_HEAD`,
+      { stdio: 'inherit' },
+    );
+  } else {
+    execSync(`git clone --depth 1 --branch "${source.branch}" "${source.repo}" "${targetDir}"`, {
+      stdio: 'inherit',
+    });
+  }
 } catch {
-  console.error(`[content] Failed to clone ${source.repo}#${source.branch}`);
+  console.error(`[content] Failed to fetch ${source.repo}#${ref}`);
   process.exit(1);
 }
 
