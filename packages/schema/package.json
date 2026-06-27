@@ -14,7 +14,7 @@
     "test": "vitest run --coverage --passWithNoTests"
   },
   "dependencies": {
-    "zod": "^3.24.0"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@vedify/eslint-config": "workspace:*",
