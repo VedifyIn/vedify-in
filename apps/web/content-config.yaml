@@ -1,0 +1,20 @@
+# Content sources - named configurations
+# Override with: CONTENT_SOURCE=<name> or --content=<name>
+sources:
+  dummy:
+    repo: git@github.com:VedifyIn/vedify-in.git
+    branch: content
+  stage:
+    repo: git@github.com:Vaidic/in.vedify.content.git
+    branch: develop
+  production:
+    repo: git@github.com:Vaidic/in.vedify.content.git
+    branch: main
+
+# Default source per branch
+defaults:
+  develop: dummy
+  main: production
+
+# Target directory (relative to apps/web/)
+target: src/content
