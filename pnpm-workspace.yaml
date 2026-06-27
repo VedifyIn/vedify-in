@@ -4,6 +4,7 @@ packages:
 allowBuilds:
   esbuild: true
   sharp: true
+  workerd: false
 minimumReleaseAgeExclude:
   - '@typescript-eslint/eslint-plugin@8.62.0'
   - '@typescript-eslint/parser@8.62.0'
