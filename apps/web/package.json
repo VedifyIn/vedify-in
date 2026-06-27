@@ -18,6 +18,7 @@
     "test": "vitest run --coverage --passWithNoTests"
   },
   "dependencies": {
+    "@vedify/schema": "workspace:*",
     "astro": "^7.0.0"
   },
   "devDependencies": {
