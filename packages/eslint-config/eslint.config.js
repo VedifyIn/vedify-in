@@ -27,4 +27,10 @@ export default [
       'astro/no-set-html-directive': 'error',
     },
   },
+  {
+    files: ['**/JsonLd.astro'],
+    rules: {
+      'astro/no-set-html-directive': 'off',
+    },
+  },
 ];
