@@ -9,13 +9,16 @@ import {
   topicSchema,
 } from './enums';
 
+// ISO 8601 date string (YYYY-MM-DD)
+const isoDateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD date format');
+
 export const baseSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1).max(120),
   description: z.string().min(1).max(200),
 
-  datePublished: z.string(),
-  dateModified: z.string(),
+  datePublished: isoDateString,
+  dateModified: isoDateString,
 
   author: z.string().min(1),
 
@@ -27,7 +30,7 @@ export const baseSchema = z.object({
   categories: z.array(z.string()).default([]),
 
   series: z.string().optional(),
-  seriesPart: z.number().int().nonnegative().optional(),
+  seriesPart: z.number().int().positive().optional(),
   seriesTitle: z.string().optional(),
   totalParts: z.number().int().positive().optional(),
   sequentialOnly: z.boolean().default(false),

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const imageSchema = z.object({
-  url: z.string().min(1),
+  url: z.string().url(),
   alt: z.string().min(1),
   width: z.number().int().positive().optional(),
   height: z.number().int().positive().optional(),
@@ -65,7 +65,7 @@ export type Rating = z.infer<typeof ratingSchema>;
 
 export const mediaObjectSchema = z.object({
   type: z.enum(['audio', 'video']),
-  url: z.string(),
+  url: z.string().url(),
   duration: z.string().optional(),
   transcript: z.string().optional(),
 });
@@ -83,7 +83,7 @@ export const quoteObjectSchema = z.object({
 export type QuoteObject = z.infer<typeof quoteObjectSchema>;
 
 export const providerSchema = z.object({
-  name: z.string(),
-  url: z.string().optional(),
+  name: z.string().min(1),
+  url: z.string().url().optional(),
 });
 export type Provider = z.infer<typeof providerSchema>;

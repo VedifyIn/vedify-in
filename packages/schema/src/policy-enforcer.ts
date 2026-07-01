@@ -40,7 +40,7 @@ export function enforcePolicy(fm: ContentFrontmatter, body?: string): PolicyResu
   }
 
   if (body && body.length > 0) {
-    const wordCount = body.split(/\s+/).length;
+    const wordCount = body.trim() === '' ? 0 : body.trim().split(/\s+/).length;
     const rule = CONTENT_LENGTH_RULES[fm.type] || CONTENT_LENGTH_RULES.default;
 
     if (wordCount < rule.min) {

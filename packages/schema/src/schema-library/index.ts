@@ -63,6 +63,11 @@ export class SchemaLibrary {
       case 'Devotional':
       case 'ShortStory':
       case 'Folktale':
+      case 'SeriesOverview':
+      case 'Gist':
+      case 'QuickNote':
+      case 'LegalPage':
+      case 'AboutMe':
         return getBlogPostingSchema(baseUrl, fm, author);
 
       case 'Tutorial':
@@ -86,20 +91,18 @@ export class SchemaLibrary {
         return getPodcastEpisodeSchema(baseUrl, fm, author);
 
       case 'ResearchPaper':
+      case 'Patent':
         return getScholarlyArticleSchema(baseUrl, fm, author);
 
       case 'Quote':
         return getQuoteSchema(baseUrl, fm, author);
 
-      case 'SeriesOverview':
-      case 'Gist':
-      case 'QuickNote':
-      case 'LegalPage':
-      case 'AboutMe':
-        return getBlogPostingSchema(baseUrl, fm, author);
-
-      default:
-        return getBlogPostingSchema(baseUrl, fm, author);
+      default: {
+        // TypeScript exhaustiveness check — if a new type is added to the enum
+        // without a case here, this line will produce a compile error.
+        const _exhaustive: never = fm;
+        return getBlogPostingSchema(baseUrl, _exhaustive, author);
+      }
     }
   }
 }

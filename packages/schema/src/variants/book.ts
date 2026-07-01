@@ -9,3 +9,5 @@ export const bookSchema = baseSchema.extend({
   reviewAspect: z.array(z.string()).optional(),
   reviewBody: z.string().optional(),
 });
+
+export type BookFrontmatter = z.infer<typeof bookSchema>;

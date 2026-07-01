@@ -7,12 +7,16 @@ export type ResolvedAuthor = {
   sameAs?: string[];
 };
 
+function joinUrl(base: string, path: string): string {
+  return `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+}
+
 export function getAuthorSchema(baseUrl: string, author: ResolvedAuthor) {
   return {
     '@type': 'Person' as const,
     '@id': `${baseUrl}/#author`,
     name: author.name,
-    url: author.url ? `${baseUrl}${author.url.startsWith('/') ? '' : '/'}${author.url}` : undefined,
+    url: author.url ? joinUrl(baseUrl, author.url) : undefined,
     image: author.avatar,
     sameAs: author.sameAs,
   };

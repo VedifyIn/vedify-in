@@ -16,3 +16,5 @@ export const recipeSchema = baseSchema.extend({
   recipeCuisine: z.string().optional(),
   suitableForDiet: z.array(dietSchema).optional(),
 });
+
+export type RecipeFrontmatter = z.infer<typeof recipeSchema>;

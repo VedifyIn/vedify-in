@@ -9,3 +9,5 @@ export const podcastSchema = baseSchema.extend({
   seasonNumber: z.number().int().positive().optional(),
   podcastSeries: z.string().optional(),
 });
+
+export type PodcastFrontmatter = z.infer<typeof podcastSchema>;

@@ -1,13 +1,25 @@
 import type { BaseFrontmatter } from '../base';
 
-export function getNutritionSchema(fm: BaseFrontmatter) {
-  if (!('nutrition' in fm) || !fm.nutrition) return undefined;
-  const n = fm.nutrition as {
+type WithNutrition = BaseFrontmatter & {
+  nutrition?: {
     calories?: string;
     protein?: string;
     carbs?: string;
     fat?: string;
   };
+};
+
+type WithRating = BaseFrontmatter & {
+  rating?: {
+    value: number;
+    bestRating?: number;
+    worstRating?: number;
+  };
+};
+
+export function getNutritionSchema(fm: WithNutrition) {
+  if (!fm.nutrition) return undefined;
+  const n = fm.nutrition;
   return {
     '@type': 'NutritionInformation' as const,
     calories: n.calories,
@@ -17,13 +29,9 @@ export function getNutritionSchema(fm: BaseFrontmatter) {
   };
 }
 
-export function getRatingSchema(fm: BaseFrontmatter) {
-  if (!('rating' in fm) || !fm.rating) return undefined;
-  const r = fm.rating as {
-    value: number;
-    bestRating?: number;
-    worstRating?: number;
-  };
+export function getRatingSchema(fm: WithRating) {
+  if (!fm.rating) return undefined;
+  const r = fm.rating;
   return {
     '@type': 'Rating' as const,
     ratingValue: r.value,

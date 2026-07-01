@@ -1,5 +1,12 @@
 import type { BaseFrontmatter } from '../base';
 import type { ResolvedAuthor } from './building-blocks';
+import type { BookMetadata } from '../nested';
+import type { TutorialCodeFrontmatter } from '../variants/tutorial-code';
+import type { RecipeFrontmatter } from '../variants/recipe';
+import type { BookFrontmatter } from '../variants/book';
+import type { PodcastFrontmatter } from '../variants/podcast';
+import type { ResearchFrontmatter } from '../variants/research';
+import type { QuoteFrontmatter } from '../variants/quote';
 import {
   getAuthorSchema,
   getImageSchema,
@@ -7,6 +14,21 @@ import {
   getOrganizationSchema,
 } from './building-blocks';
 import { getNutritionSchema, getRatingSchema } from './measurements';
+
+// Shared helper — avoids duplicating the Book object shape in two functions
+function buildBookItem(book: BookMetadata, image?: ReturnType<typeof getImageSchema>) {
+  return {
+    '@type': 'Book' as const,
+    name: book.title,
+    author: { '@type': 'Person' as const, name: book.author },
+    isbn: book.isbn,
+    publisher: book.publisher,
+    numberOfPages: book.pages,
+    genre: book.genre,
+    datePublished: book.publicationDate,
+    image,
+  };
+}
 
 export function getBlogPostingSchema(baseUrl: string, fm: BaseFrontmatter, author: ResolvedAuthor) {
   return {
@@ -25,13 +47,11 @@ export function getBlogPostingSchema(baseUrl: string, fm: BaseFrontmatter, autho
   };
 }
 
-export function getTechArticleSchema(baseUrl: string, fm: BaseFrontmatter, author: ResolvedAuthor) {
-  const extra = fm as BaseFrontmatter & {
-    programmingLanguage?: string[];
-    codeRepository?: string;
-    dependencies?: string[];
-    codeSnippet?: string;
-  };
+export function getTechArticleSchema(
+  baseUrl: string,
+  fm: TutorialCodeFrontmatter,
+  author: ResolvedAuthor,
+) {
   return {
     '@context': 'https://schema.org',
     '@type': 'TechArticle' as const,
@@ -41,37 +61,26 @@ export function getTechArticleSchema(baseUrl: string, fm: BaseFrontmatter, autho
     publisher: getOrganizationSchema(baseUrl),
     image: getImageSchema(fm),
     mainEntityOfPage: getWebPageSchema(baseUrl, fm),
-    about: extra.programmingLanguage
+    about: fm.programmingLanguage
       ? {
           '@type': 'SoftwareApplication' as const,
           name: fm.title,
-          programmingLanguage: extra.programmingLanguage,
+          programmingLanguage: fm.programmingLanguage,
         }
       : undefined,
-    codeRepository: extra.codeRepository,
-    dependencies: extra.dependencies,
-    hasPart: extra.codeSnippet
+    codeRepository: fm.codeRepository,
+    dependencies: fm.dependencies,
+    hasPart: fm.codeSnippet
       ? {
           '@type': 'SoftwareSourceCode' as const,
-          code: extra.codeSnippet,
-          programmingLanguage: extra.programmingLanguage?.[0],
+          code: fm.codeSnippet,
+          programmingLanguage: fm.programmingLanguage?.[0],
         }
       : undefined,
   };
 }
 
-export function getRecipeSchema(baseUrl: string, fm: BaseFrontmatter, author: ResolvedAuthor) {
-  const extra = fm as BaseFrontmatter & {
-    ingredients?: Array<{ name: string; amount: string; preparation?: string }>;
-    instructions?: Array<{ text: string; image?: string }>;
-    cookingMethod?: string;
-    prepTime?: string;
-    cookTime?: string;
-    yields?: string;
-    recipeCategory?: string;
-    recipeCuisine?: string;
-    suitableForDiet?: string[];
-  };
+export function getRecipeSchema(baseUrl: string, fm: RecipeFrontmatter, author: ResolvedAuthor) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Recipe' as const,
@@ -80,87 +89,43 @@ export function getRecipeSchema(baseUrl: string, fm: BaseFrontmatter, author: Re
     author: getAuthorSchema(baseUrl, author),
     image: getImageSchema(fm),
     mainEntityOfPage: getWebPageSchema(baseUrl, fm),
-    prepTime: extra.prepTime,
-    cookTime: extra.cookTime,
+    prepTime: fm.prepTime,
+    cookTime: fm.cookTime,
     totalTime: fm.totalTime,
-    recipeYield: extra.yields,
-    recipeCategory: extra.recipeCategory,
-    recipeCuisine: extra.recipeCuisine,
-    cookingMethod: extra.cookingMethod,
-    recipeIngredient: extra.ingredients?.map(
+    recipeYield: fm.yields,
+    recipeCategory: fm.recipeCategory,
+    recipeCuisine: fm.recipeCuisine,
+    cookingMethod: fm.cookingMethod,
+    recipeIngredient: fm.ingredients?.map(
       (ing) => `${ing.amount} ${ing.name}${ing.preparation ? `, ${ing.preparation}` : ''}`,
     ),
-    recipeInstructions: extra.instructions?.map((step, i) => ({
+    recipeInstructions: fm.instructions?.map((step, i) => ({
       '@type': 'HowToStep' as const,
       position: i + 1,
       text: step.text,
       image: step.image,
     })),
     nutrition: getNutritionSchema(fm),
-    suitableForDiet: extra.suitableForDiet?.map((d) => ({ '@type': d as string })),
+    suitableForDiet: fm.suitableForDiet?.map((d) => ({ '@type': d as string })),
   };
 }
 
-export function getBookSchema(_baseUrl: string, fm: BaseFrontmatter, _author: ResolvedAuthor) {
-  const extra = fm as BaseFrontmatter & {
-    book?: {
-      title: string;
-      author: string;
-      isbn?: string;
-      publisher?: string;
-      pages?: number;
-      genre?: string[];
-      publicationDate?: string;
-    };
-    rating?: { value: number; bestRating?: number; worstRating?: number };
-    reviewBody?: string;
-  };
-  if (!extra.book) return undefined;
+export function getBookSchema(_baseUrl: string, fm: BookFrontmatter, _author: ResolvedAuthor) {
+  if (!fm.book) return undefined;
   return {
     '@context': 'https://schema.org',
-    '@type': 'Book' as const,
-    name: extra.book.title,
-    author: { '@type': 'Person' as const, name: extra.book.author },
-    isbn: extra.book.isbn,
-    publisher: extra.book.publisher,
-    numberOfPages: extra.book.pages,
-    genre: extra.book.genre,
-    datePublished: extra.book.publicationDate,
-    image: getImageSchema(fm),
+    ...buildBookItem(fm.book, getImageSchema(fm)),
   };
 }
 
-export function getReviewSchema(baseUrl: string, fm: BaseFrontmatter, author: ResolvedAuthor) {
-  const extra = fm as BaseFrontmatter & {
-    book?: {
-      title: string;
-      author: string;
-      isbn?: string;
-      publisher?: string;
-      pages?: number;
-      genre?: string[];
-      publicationDate?: string;
-    };
-    rating?: { value: number; bestRating?: number; worstRating?: number };
-    reviewAspect?: string[];
-    reviewBody?: string;
-  };
-  if (!extra.book) return undefined;
+export function getReviewSchema(baseUrl: string, fm: BookFrontmatter, author: ResolvedAuthor) {
+  if (!fm.book) return undefined;
   return {
     '@context': 'https://schema.org',
     '@type': 'Review' as const,
-    itemReviewed: {
-      '@type': 'Book' as const,
-      name: extra.book.title,
-      author: { '@type': 'Person' as const, name: extra.book.author },
-      isbn: extra.book.isbn,
-      publisher: extra.book.publisher,
-      numberOfPages: extra.book.pages,
-      genre: extra.book.genre,
-      datePublished: extra.book.publicationDate,
-    },
+    itemReviewed: buildBookItem(fm.book),
     reviewRating: getRatingSchema(fm),
-    reviewBody: extra.reviewBody,
+    reviewBody: fm.reviewBody,
     author: getAuthorSchema(baseUrl, author),
   };
 }
@@ -202,15 +167,9 @@ export function getCourseSchema(baseUrl: string, fm: BaseFrontmatter, author: Re
 
 export function getPodcastEpisodeSchema(
   baseUrl: string,
-  fm: BaseFrontmatter,
+  fm: PodcastFrontmatter,
   author: ResolvedAuthor,
 ) {
-  const extra = fm as BaseFrontmatter & {
-    media?: { type: string; url: string; duration?: string; transcript?: string };
-    episodeNumber?: number;
-    seasonNumber?: number;
-    podcastSeries?: string;
-  };
   return {
     '@context': 'https://schema.org',
     '@type': 'PodcastEpisode' as const,
@@ -219,20 +178,20 @@ export function getPodcastEpisodeSchema(
     description: fm.description,
     author: getAuthorSchema(baseUrl, author),
     image: getImageSchema(fm),
-    audio: extra.media
+    audio: fm.media
       ? {
           '@type': 'AudioObject' as const,
-          contentUrl: extra.media.url,
-          duration: extra.media.duration,
-          transcript: extra.media.transcript,
+          contentUrl: fm.media.url,
+          duration: fm.media.duration,
+          transcript: fm.media.transcript,
         }
       : undefined,
-    episodeNumber: extra.episodeNumber,
-    seasonNumber: extra.seasonNumber,
-    partOfSeries: extra.podcastSeries
+    episodeNumber: fm.episodeNumber,
+    seasonNumber: fm.seasonNumber,
+    partOfSeries: fm.podcastSeries
       ? {
           '@type': 'PodcastSeries' as const,
-          name: extra.podcastSeries,
+          name: fm.podcastSeries,
         }
       : undefined,
   };
@@ -240,15 +199,9 @@ export function getPodcastEpisodeSchema(
 
 export function getScholarlyArticleSchema(
   baseUrl: string,
-  fm: BaseFrontmatter,
+  fm: ResearchFrontmatter,
   author: ResolvedAuthor,
 ) {
-  const extra = fm as BaseFrontmatter & {
-    citation?: string;
-    journal?: string;
-    doi?: string;
-    arxivId?: string;
-  };
   return {
     '@context': 'https://schema.org',
     '@type': 'ScholarlyArticle' as const,
@@ -257,32 +210,25 @@ export function getScholarlyArticleSchema(
     author: getAuthorSchema(baseUrl, author),
     image: getImageSchema(fm),
     mainEntityOfPage: getWebPageSchema(baseUrl, fm),
-    citation: extra.citation,
-    journal: extra.journal,
-    doi: extra.doi,
-    sameAs: extra.arxivId ? `https://arxiv.org/abs/${extra.arxivId}` : undefined,
+    citation: fm.citation,
+    journal: fm.journal,
+    doi: fm.doi,
+    sameAs: fm.arxivId ? `https://arxiv.org/abs/${fm.arxivId}` : undefined,
   };
 }
 
-export function getQuoteSchema(_baseUrl: string, fm: BaseFrontmatter, _author: ResolvedAuthor) {
-  const extra = fm as BaseFrontmatter & {
-    quote?: {
-      text: string;
-      attributedTo: { name: string; url?: string; sameAs?: string[] };
-      context?: string;
-    };
-  };
-  if (!extra.quote) return undefined;
+export function getQuoteSchema(_baseUrl: string, fm: QuoteFrontmatter, _author: ResolvedAuthor) {
+  if (!fm.quote) return undefined;
   return {
     '@context': 'https://schema.org',
     '@type': 'Quote' as const,
-    text: extra.quote.text,
+    text: fm.quote.text,
     author: {
       '@type': 'Person' as const,
-      name: extra.quote.attributedTo.name,
-      url: extra.quote.attributedTo.url,
-      sameAs: extra.quote.attributedTo.sameAs,
+      name: fm.quote.attributedTo.name,
+      url: fm.quote.attributedTo.url,
+      sameAs: fm.quote.attributedTo.sameAs,
     },
-    about: extra.quote.context,
+    about: fm.quote.context,
   };
 }

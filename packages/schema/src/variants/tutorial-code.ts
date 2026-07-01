@@ -8,3 +8,5 @@ export const tutorialCodeSchema = baseSchema.extend({
   dependencies: z.array(z.string()).optional(),
   codeSnippet: z.string().optional(),
 });
+
+export type TutorialCodeFrontmatter = z.infer<typeof tutorialCodeSchema>;

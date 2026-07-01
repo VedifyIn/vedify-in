@@ -11,3 +11,5 @@ export const researchSchema = baseSchema.extend({
   applicant: z.string().optional(),
   issueDate: z.string().optional(),
 });
+
+export type ResearchFrontmatter = z.infer<typeof researchSchema>;

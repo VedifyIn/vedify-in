@@ -1113,7 +1113,7 @@ describe('getBlogPostingSchema', () => {
 
 describe('getTechArticleSchema', () => {
   it('returns a TechArticle', () => {
-    const fm = baseSchema.parse({ ...validBase, tags: ['TypeScript'] });
+    const fm = tutorialCodeSchema.parse({ ...validBase, type: 'Tutorial', tags: ['TypeScript'] });
     const result = getTechArticleSchema(baseUrl, fm, author);
     expect(result['@type']).toBe('TechArticle');
     expect(result.headline).toBe('Test Post Title');
@@ -1123,7 +1123,7 @@ describe('getTechArticleSchema', () => {
 
 describe('getRecipeSchema', () => {
   it('returns a Recipe', () => {
-    const fm = baseSchema.parse(validBase);
+    const fm = recipeSchema.parse({ ...validBase, type: 'Recipe' });
     const result = getRecipeSchema(baseUrl, fm, author);
     expect(result['@type']).toBe('Recipe');
     expect(result.name).toBe('Test Post Title');
@@ -1145,7 +1145,7 @@ describe('getBookSchema', () => {
   });
 
   it('returns undefined when no book metadata', () => {
-    const fm = baseSchema.parse(validBase);
+    const fm = bookSchema.parse({ ...validBase, type: 'Book' });
     const result = getBookSchema(baseUrl, fm, author);
     expect(result).toBeUndefined();
   });
@@ -1165,7 +1165,7 @@ describe('getReviewSchema', () => {
   });
 
   it('returns undefined when no book metadata', () => {
-    const fm = baseSchema.parse(validBase);
+    const fm = bookSchema.parse({ ...validBase, type: 'Book' });
     expect(getReviewSchema(baseUrl, fm, author)).toBeUndefined();
   });
 });
@@ -1181,7 +1181,7 @@ describe('getCourseSchema', () => {
 
 describe('getPodcastEpisodeSchema', () => {
   it('returns a PodcastEpisode', () => {
-    const fm = baseSchema.parse(validBase);
+    const fm = podcastSchema.parse({ ...validBase, type: 'PodcastEpisode' });
     const result = getPodcastEpisodeSchema(baseUrl, fm, author);
     expect(result['@type']).toBe('PodcastEpisode');
     expect(result.url).toBe(`${baseUrl}/test-post`);
@@ -1190,7 +1190,7 @@ describe('getPodcastEpisodeSchema', () => {
 
 describe('getScholarlyArticleSchema', () => {
   it('returns a ScholarlyArticle', () => {
-    const fm = baseSchema.parse(validBase);
+    const fm = researchSchema.parse({ ...validBase, type: 'ResearchPaper' });
     const result = getScholarlyArticleSchema(baseUrl, fm, author);
     expect(result['@type']).toBe('ScholarlyArticle');
     expect(result.name).toBe('Test Post Title');
@@ -1215,7 +1215,7 @@ describe('getQuoteSchema', () => {
   });
 
   it('returns undefined when no quote object', () => {
-    const fm = baseSchema.parse(validBase);
+    const fm = quoteSchema.parse({ ...validBase, type: 'Quote' });
     expect(getQuoteSchema(baseUrl, fm, author)).toBeUndefined();
   });
 });
